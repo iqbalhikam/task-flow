@@ -22,23 +22,26 @@ import { registerFormSchema, type RegisterFormSchema } from "../form/register";
 import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCode";
 import { toast } from "sonner";
 import { RegisterFormInner } from "~/features/components/RegisterFormInner";
+import { useState } from "react";
 
 const LoginPage = () => {
   const form = useForm<RegisterFormSchema>({
     resolver: zodResolver(registerFormSchema),
   });
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const handleLoginSubmit = async (values: RegisterFormSchema) => {
+
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
       if (error) throw error;
-
       await router.replace("/");
     } catch (error) {
       switch ((error as AuthError).code) {
@@ -54,6 +57,8 @@ const LoginPage = () => {
         default:
           toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
       }
+    }finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -63,19 +68,19 @@ const LoginPage = () => {
           padded
           className="flex min-h-[calc(100vh-144px)] w-full flex-col justify-center"
         >
-          <Card className="w-full max-w-[480px] self-center">
-            <CardHeader className="flex flex-col items-center justify-center ">
+          <Card className="w-full max-w-sm self-center">
+            <CardHeader className="flex flex-col justify-center">
               <CardTitle className="text-primary text-3xl font-bold">
-                Selamat Datang Kembali 👋
+                Login Sekarang!!!
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Manajement tugas ada dengan mudah
+                DanManajement tugas ada dengan mudah
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
                 <RegisterFormInner
-                  // isLoading={registerUserIsPending}
+                  isLoading={isLoading}
                   onRegisterSubmit={handleLoginSubmit}
                   buttonText="Masuk"
                 />

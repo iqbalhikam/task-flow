@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { GuestRoute } from "~/components/layouts/GuestRoute";
 import { PageContainer } from "~/components/layouts/PageContainer";
@@ -11,14 +11,48 @@ import { RegisterFormInner } from "~/features/components/RegisterFormInner";
 import { Button } from "~/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
+import { supabase } from "~/lib/supabase/client";
+import { useRouter } from "next/router";
+import type { AuthError } from "@supabase/supabase-js";
+import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCode";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
     const form = useForm<RegisterFormSchema>({
         resolver: zodResolver(registerFormSchema)
     })
 
-    const heandleRregisterSubmit = () => {
-        return
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const router = useRouter();
+
+    const heandleRregisterSubmit = async ( values : RegisterFormSchema) => {
+      try {
+        setIsLoading(true);
+        const res = supabase.auth.signUp({
+          email: values.email,
+          password: values.password
+        })
+
+        const error = (await res).error
+        if (error) throw error
+
+        await router.replace("/");
+      } catch (error) {
+        switch ((error as AuthError).code) {
+          // email_address_invalid
+          case SupabaseAuthErrorCode.email_exists:
+            form.setError("email", { message: "Email sudah terdaftar" });
+            break;
+          case SupabaseAuthErrorCode.email_conflict_identity_not_deletable:
+            form.setError("email", { message: "Email sudah terdaftar" });
+            break;
+          default:
+            toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
+        }
+      }finally {
+        setIsLoading(false);
+      }
     }
   return (
     <GuestRoute>
@@ -37,8 +71,9 @@ const RegisterPage = () => {
             <CardContent>
               <Form {...form}>
                 <RegisterFormInner
+                  isLoading = {isLoading}
                   onRegisterSubmit={heandleRregisterSubmit}
-                  buttonText="Daftar Sekarang"
+                  buttonText="Daftar"
                 />
               </Form>
             </CardContent>
