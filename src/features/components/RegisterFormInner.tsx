@@ -13,6 +13,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useState } from "react";
 import type { RegisterFormSchema } from "../auth/form/register";
+import { Loader2Icon } from "lucide-react";
 
 type RegisterFormInnerProps = {
   onRegisterSubmit: (values: RegisterFormSchema) => void;
@@ -71,6 +72,7 @@ export const RegisterFormInner = (props: RegisterFormInnerProps) => {
       )}
 
       <Button disabled={props.isLoading} size="lg" className="mt-4 w-full">
+        {props.isLoading && <Loader2Icon className="animate-spin" />}
         {props.buttonText ?? "Buat Akun"}
       </Button>
     </form>

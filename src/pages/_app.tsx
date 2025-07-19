@@ -5,6 +5,7 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { ThemeProvider } from "~/components/theme-provider";
+import { Toaster } from "sonner";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     <div className={geist.className}>
       <Component {...pageProps} />
     </div>
+    <Toaster />
     </ThemeProvider>
   );
 };
