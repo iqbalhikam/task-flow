@@ -18,3 +18,9 @@ model Post {
     updatedAt DateTime @updatedAt
     @@index([name])
 }
+
+model Profile {
+    userId String @id
+    email String @unique
+    username String @unique
+}

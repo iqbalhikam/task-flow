@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { GuestRoute } from "~/components/layouts/GuestRoute";
 import { PageContainer } from "~/components/layouts/PageContainer";
@@ -11,48 +10,39 @@ import { RegisterFormInner } from "~/features/components/RegisterFormInner";
 import { Button } from "~/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
-import { supabase } from "~/lib/supabase/client";
 import { useRouter } from "next/router";
-import type { AuthError } from "@supabase/supabase-js";
-import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCode";
 import { toast } from "sonner";
+import { api } from "~/utils/api";
+import { error } from "console";
 
 const RegisterPage = () => {
     const form = useForm<RegisterFormSchema>({
         resolver: zodResolver(registerFormSchema)
     })
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
     const router = useRouter();
 
+    const { mutate: registerUser, isPending: registerUserIsPending } = api.auth.register.useMutation({
+      onSuccess: async () => {
+        toast.success("Register berhasil");
+        form.setValue("email", "");
+        form.setValue("password", "");
+        await router.push("/");
+      },
+      onError: (error) => {
+        console.log("TRPC ERROR: ",error);
+        
+        toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
+      },
+    })
+
     const heandleRregisterSubmit = async ( values : RegisterFormSchema) => {
-      try {
-        setIsLoading(true);
-        const res = supabase.auth.signUp({
-          email: values.email,
-          password: values.password
-        })
+      registerUser(values);
 
-        const error = (await res).error
-        if (error) throw error
+    }
 
-        await router.replace("/");
-      } catch (error) {
-        switch ((error as AuthError).code) {
-          // email_address_invalid
-          case SupabaseAuthErrorCode.email_exists:
-            form.setError("email", { message: "Email sudah terdaftar" });
-            break;
-          case SupabaseAuthErrorCode.email_conflict_identity_not_deletable:
-            form.setError("email", { message: "Email sudah terdaftar" });
-            break;
-          default:
-            toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
-        }
-      }finally {
-        setIsLoading(false);
-      }
+    const handleGoogleRegister = async () => {
+      toast.info("Fitur register dengan google belum tersedia🙏");
     }
   return (
     <GuestRoute>
@@ -71,7 +61,7 @@ const RegisterPage = () => {
             <CardContent>
               <Form {...form}>
                 <RegisterFormInner
-                  isLoading = {isLoading}
+                  isLoading = {registerUserIsPending}
                   onRegisterSubmit={heandleRregisterSubmit}
                   buttonText="Daftar"
                 />
@@ -86,7 +76,7 @@ const RegisterPage = () => {
                 <div className="h-[2px] w-full border-t-2" />
               </div>
 
-              <Button variant="default" className="w-full" size="lg">
+              <Button onClick={handleGoogleRegister} variant="default" className="w-full" size="lg">
                 <FcGoogle />
                 Daftar dengan Google
               </Button>
