@@ -11,16 +11,10 @@ datasource db {
     directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    @@index([name])
-}
-
 model Profile {
     userId String @id
     email String @unique
     username String @unique
+
+    profilePictureUrl String?
 }

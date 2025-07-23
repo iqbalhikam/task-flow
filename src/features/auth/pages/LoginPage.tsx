@@ -21,7 +21,7 @@ import { supabase } from "~/lib/supabase/client";
 import { registerFormSchema, type RegisterFormSchema } from "../form/register";
 import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCode";
 import { toast } from "sonner";
-import { RegisterFormInner } from "~/features/components/RegisterFormInner";
+import { RegisterFormInner } from "~/features/auth/components/RegisterFormInner";
 import { useState } from "react";
 
 const LoginPage = () => {
@@ -33,7 +33,6 @@ const LoginPage = () => {
   const router = useRouter();
 
   const handleLoginSubmit = async (values: RegisterFormSchema) => {
-
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
@@ -57,7 +56,7 @@ const LoginPage = () => {
         default:
           toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
       }
-    }finally {
+    } finally {
       setIsLoading(false);
     }
   };

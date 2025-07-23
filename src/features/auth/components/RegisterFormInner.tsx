@@ -12,7 +12,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useState } from "react";
-import type { RegisterFormSchema } from "../auth/form/register";
+import type { RegisterFormSchema } from "../form/register";
 import { Loader2Icon } from "lucide-react";
 
 type RegisterFormInnerProps = {

@@ -34,6 +34,7 @@ export const authRouter = createTRPCRouter({
           if (data.user) {
             userId = data.user.id;
           }
+
           // jika ada error maka throw error
           if (error) throw error;
 
@@ -44,7 +45,7 @@ export const authRouter = createTRPCRouter({
           await tx.profile.create({
             data: {
               email,
-              userId: data.user.id,
+              userId,
               username: generatedUserName,
             },
           });
