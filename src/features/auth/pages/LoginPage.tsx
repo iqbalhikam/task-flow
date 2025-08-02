@@ -41,7 +41,7 @@ const LoginPage = () => {
       });
 
       if (error) throw error;
-      await router.replace("/");
+      await router.replace("/dashboard");
     } catch (error) {
       switch ((error as AuthError).code) {
         case SupabaseAuthErrorCode.invalid_credentials:

@@ -10,7 +10,7 @@ export const GuestRoute = ( props : PropsWithChildren) => {
         const { data } = await supabase.auth.getUser();
 
         if (data.user) {
-          await router.replace("/");
+          await router.replace("/dashboard");
         }
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps

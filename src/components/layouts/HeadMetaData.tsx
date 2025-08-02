@@ -8,12 +8,12 @@ export const HeadMetaData: React.FC<{
   // ogImageUrl?: string;
   pathname?: string;
 }> = ({
-  title = "Konten kamu berharga",
+  title = "Produktivitas Terorganisir",
   metaDescription,
   // ogImageUrl = env.NEXT_PUBLIC_OG_IMAGE_URL,
   pathname = "",
 }) => {
-  const defaultTitle = "Qepo Lu";
+  const defaultTitle = "Task Flow";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const baseUrl =
