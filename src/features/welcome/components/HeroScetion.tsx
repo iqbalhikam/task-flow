@@ -28,7 +28,7 @@ const route = useRouter()
       >
         <div className="mx-20 flex flex-col gap-10 text-center">
           <div className="flex flex-col gap-4 lg:mx-16">
-            <h1 className="text-secondary-foreground text-center font-sans text-2xl sm:text-3xl lg:text-6xl">
+            <h1 className="text-secondary-foreground text-center font-sans text-2xl md:text-4xl lg:text-6xl">
               <span className="text-primary">Fokus Tercapai,</span>{" "}
               <span className="dark:text-shadow-primary-foreground text-shadow-primary text-shadow-[0px_0px_10px]">
                 Produktivitas
@@ -36,7 +36,7 @@ const route = useRouter()
               <span className="text-primary"> Terorganisir</span>
             </h1>
 
-            <p className="sm:text-[10px] lg:text-xl">
+            <p className="lg:text-xl text-xs md:text-sm">
               Aplikasi manajemen tugas visual yang menggabungkan Papan Kanban
               intuitif dengan Teknik Pomodoro untuk membantu Anda menyelesaikan
               lebih banyak pekerjaan.
@@ -48,7 +48,7 @@ const route = useRouter()
             drag
             whileDrag={{ scale: 1.1 }}
           >
-            <Card className="shadow-secondary h-fit w-64 gap-2 bg-black/5 backdrop-blur-sm shadow-none even:not-focus:shadow-[0px_0px_10px_10px] dark:bg-white/1">
+            <Card className="shadow-secondary h-fit w-64 gap-2 bg-black/5 shadow-none backdrop-blur-sm even:not-focus:shadow-[0px_0px_10px_10px] dark:bg-white/1">
               <CardHeader className="justify-between text-start">
                 <CardTitle className="text-sm">Projek App TaskFlow</CardTitle>
                 {/* <CardDescription className="lg:text-[9px]">
@@ -111,7 +111,10 @@ const route = useRouter()
             </Card>
           </motion.div>
           <div className="flex justify-center gap-4">
-            <Button onClick={heandleRegister} className="dark:bg-secondary-foreground dark:hover:bg-secondary-foreground/80 dark:text-primary lg:text-md dark:border-primary border-secondary-foreground min-w-fit rounded-xl border-[1px_5px_5px_1px] text-white sm:text-sm lg:h-15 lg:px-10 lg:font-bold">
+            <Button
+              onClick={heandleRegister}
+              className="dark:bg-secondary-foreground dark:hover:bg-secondary-foreground/80 dark:text-primary lg:text-md dark:border-primary border-secondary-foreground min-w-fit rounded-xl border-[1px_5px_5px_1px] text-white sm:text-sm lg:h-15 lg:px-10 lg:font-bold"
+            >
               Daftar Gratis
             </Button>
             <Button className="hover:bg-secondary-foreground/10 text-secondary-foreground lg:text-md dark:border-primary border-secondary-foreground min-w-fit rounded-xl border-[1px_5px_5px_1px] bg-transparent sm:text-sm lg:h-15 lg:px-10">

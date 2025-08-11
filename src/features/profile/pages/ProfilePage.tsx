@@ -31,6 +31,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { icons } from "lucide-react";
+import SideNav from "~/components/layouts/SideNav";
 
 const ProfilePage = () => {
   const form = useForm<EditProfileFormSchema>({
@@ -115,7 +116,9 @@ const ProfilePage = () => {
 
   return (
     <AuthRoute>
-      <PageContainer>
+      <SideNav>
+
+      {/* <PageContainer> */}
         <SectionContainer
           padded
           minFullscreen
@@ -239,7 +242,8 @@ const ProfilePage = () => {
             </Button>
           </div>
         </SectionContainer>
-      </PageContainer>
+      {/* </PageContainer> */}
+      </SideNav>
     </AuthRoute>
   );
 };
