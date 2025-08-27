@@ -1,6 +1,5 @@
 import { AppSidebar } from "../app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
-import { SectionContainer } from "./SectionContainer";
 
 type propsSideNav = {
   children: React.ReactNode;
