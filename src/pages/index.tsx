@@ -1,1 +1,1 @@
-export {default} from "~/features/welcome/pages/LandigPage";
+export {default} from "~/features/landing/pages/LandigPage";

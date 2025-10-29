@@ -1,33 +1,49 @@
+// src/features/dashboard/components/CardTask.tsx
+
 import { TbProgress } from "react-icons/tb";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-
 import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Task = {
   id: string;
   title: string;
 };
 
-type TasksByGroup = Record<string, Task[]>;
-
-
 const CardTask = ({ id, title }: Task) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging, // <-- Tambahkan ini
+  } = useSortable({
+    id,
+    data: {
+      type: "TASK",
+      task: { id, title },
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    // Saat dragging, buat kartu asli menjadi transparan
+    opacity: isDragging ? 0 : 1, // <-- Tambahkan ini
+  };
 
   return (
     <Card
       ref={setNodeRef}
+      style={style}
       {...attributes}
-      {...listeners} className="shadow-secondary h-fit w-64 gap-2 bg-black/5 shadow-none backdrop-blur-sm even:not-focus:shadow-[0px_0px_10px_10px] dark:bg-white/1"
+      {...listeners}
+      className="shadow-secondary h-fit w-64 gap-2 bg-black/5 shadow-none backdrop-blur-sm dark:bg-white/1"
     >
       <CardHeader className="justify-between text-start">
         <CardTitle className="text-sm">{title}</CardTitle>
-        {/* <CardDescription className="lg:text-[9px]">
-                  Aplikasi manajemen tugas visual yang menggabungkan Papan
-                  Kanban intuitif dengan Teknik Pomodoro....
-                </CardDescription> */}
       </CardHeader>
       <CardContent>
         <div className="flex items-start justify-between">

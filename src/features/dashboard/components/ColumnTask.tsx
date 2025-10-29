@@ -1,10 +1,15 @@
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+// src/features/dashboard/components/ColumnTask.tsx
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import CardTask from "./CardTask";
+import { useDroppable } from "@dnd-kit/core"; // <-- Ganti import
 
 type Task = {
-    id: string;
-    title: string;
-    // Tambahkan properti lain jika ada, contoh: description?: string;
+  id: string;
+  title: string;
 };
 
 interface ColumnTaskProps {
@@ -13,41 +18,62 @@ interface ColumnTaskProps {
   tasks: Task[];
 }
 
-const ColumnTask = ({id, title, tasks} : ColumnTaskProps) => {
-    const { setNodeRef } = useSortable({ id });
-    return (
-      <div
+const ColumnTask = ({ id, title, tasks }: ColumnTaskProps) => {
+  // Ganti dari useSortable menjadi useDroppable
+  const { setNodeRef } = useDroppable({
+    id,
+    data: {
+      type: "COLUMN",
+    },
+  });
+
+  const taskIds = tasks.map((task) => task.id);
+
+  return (
+    // Gunakan setNodeRef dari useDroppable
+    <div
+      ref={setNodeRef}
+      style={{
+        flex: 1,
+        padding: "10px",
+        backgroundColor: "hsl(var(--card))",
+        borderRadius: "8px",
+        display: "flex",
+        flexDirection: "column",
+        minWidth: "280px",
+        minHeight: "200px", // Beri tinggi minimum agar area drop terasa
+      }}
+    >
+      <h3
         style={{
-          flex: 1,
-          padding: "10px",
-          backgroundColor: "#f4f5f7",
-          borderRadius: "8px",
-          display: "flex",
-          flexDirection: "column",
+          marginBottom: "15px",
+          paddingBottom: "10px",
+          borderBottom: "2px solid hsl(var(--border))",
+          textTransform: "capitalize",
         }}
       >
-        <h3
+        {title}
+      </h3>
+      <SortableContext
+        id={id}
+        items={taskIds}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
           style={{
-            marginBottom: "15px",
-            paddingBottom: "10px",
-            borderBottom: "2px solid #ccc",
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
           }}
         >
-          {title}
-        </h3>
-        <SortableContext
-          id={id}
-          items={tasks}
-          strategy={verticalListSortingStrategy}
-        >
-          <div style={{ flexGrow: 1 }}>
-            {tasks.map((task) => (
-              <CardTask key={task.id} id={task.id} title={task.title} />
-            ))}
-          </div>
-        </SortableContext>
-      </div>
-    );
-}
+          {tasks.map((task) => (
+            <CardTask key={task.id} id={task.id} title={task.title} />
+          ))}
+        </div>
+      </SortableContext>
+    </div>
+  );
+};
 
 export default ColumnTask;

@@ -23,7 +23,7 @@ const HeroScetion = (props: propsConstraintsRef) => {
   return (
     <SectionContainer
       padded
-      className="flex min-h-screen flex-col content-center items-center justify-center border-b"
+      className="flex min-h-screen flex-col content-center items-center justify-center"
     >
       <div className="mx-20 flex flex-col gap-10 text-center">
         <div className="flex flex-col gap-4 lg:mx-16">

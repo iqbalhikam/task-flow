@@ -1,22 +1,37 @@
-import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import {
+  closestCorners,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { toast } from "sonner";
 import { AuthRoute } from "~/components/layouts/AuthRoute";
 import SideNav from "~/components/layouts/SideNav";
 import { supabase } from "~/lib/supabase/client";
-import Draggable from "../components/Draggable";
-import { useState } from "react";
-import { arrayMove } from "@dnd-kit/sortable";
+import CardTask from "../components/CardTask";
 import ColumnTask from "../components/ColumnTask";
+import { Button } from "~/components/ui/button";
 
+// Tipe data untuk Task
 type Task = {
   id: string;
   title: string;
 };
-type TasksByGroup = Record<string, Task[]> ;
+
+// Tipe data untuk grup task, di mana key adalah ID kolom
+type TasksByGroup = Record<string, Task[]>;
 
 const DashboardPage = () => {
   const router = useRouter();
+
+  // Fungsi untuk logout
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -26,130 +41,138 @@ const DashboardPage = () => {
     await router.push("/login");
   };
 
+  // State awal untuk data papan Kanban
   const [tasksByGroup, setTasksByGroup] = useState<TasksByGroup>({
-    "group-todo": [
+    todo: [
       { id: "1", title: "Mendesain UI/UX" },
       { id: "2", title: "Membuat Komponen Button" },
       { id: "3", title: "Integrasi API Login" },
     ],
-    "group-in-progress": [
+    "in-progress": [
       { id: "4", title: "Mengerjakan Halaman Dashboard" },
       { id: "5", title: "Memperbaiki Bug Responsi" },
     ],
-    "group-done": [{ id: "6", title: "Setup Proyek Next.js" }],
+    done: [{ id: "6", title: "Setup Proyek Next.js" }],
   });
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  // State untuk menyimpan data task yang sedang di-drag
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
-  const findContainer = (id: string): string | undefined=> {
+  // Konfigurasi sensor untuk mendeteksi input drag
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+  );
+
+  /**
+   * Fungsi untuk menemukan ID kolom (container) dari sebuah task.
+   */
+  const findContainerId = (id: string) => {
     if (id in tasksByGroup) {
       return id;
     }
-
-    Object.keys(tasksByGroup).find((key) => {
-      if (!tasksByGroup[key]) return false;
-      return tasksByGroup[key].find((task) => task.id === id)
-    }
+    return Object.keys(tasksByGroup).find((key) =>
+      tasksByGroup[key]?.some((task) => task.id === id),
     );
   };
 
+  /**
+   * Handler yang dieksekusi saat drag dimulai.
+   */
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const task = Object.values(tasksByGroup)
+      .flat()
+      .find((t) => t.id === active.id);
+    if (task) {
+      setActiveTask(task);
+    }
+  };
+
+  /**
+   * Handler utama yang dieksekusi saat drag selesai.
+   */
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveTask(null);
+
     if (!over) return;
 
-    const activeId = String(active.id);
-    const overId = String(over.id);
+    const activeId = active.id.toString();
+    const overId = over.id.toString();
 
-    const activeContainerId = findContainer(activeId);
-    const overContainerId = findContainer(overId);
+    if (activeId === overId) return;
 
-    if (!activeContainerId || !overContainerId) return;
+    const activeContainer = findContainerId(activeId);
+    const overContainer = findContainerId(overId);
 
-    // Kasus 1: Memindahkan kartu di kolom yang sama (reordering)
-    if (activeContainerId === overContainerId) {
-      setTasksByGroup((prev) => {
-        const activeIndex = prev[activeContainerId]?.findIndex(
-          (t) => t.id === activeId,
-        );
-        const overIndex = prev[overContainerId]?.findIndex(
-          (t) => t.id === overId,
-        );
+    if (!activeContainer || !overContainer) return;
 
-        // Hanya lakukan perubahan jika posisinya berbeda
-        if (activeIndex !== overIndex) {
-          return {
-            ...prev,
-            [activeContainerId]: arrayMove(
-              prev[activeContainerId],
-              activeIndex,
-              overIndex,
-            ),
-          };
-        }
-        return prev;
-      });
-    }
-    // Kasus 2: Memindahkan kartu antar kolom
-    else {
-      setTasksByGroup((prev) => {
-        const newTasks = { ...prev };
-        const activeItems = newTasks[activeContainerId];
-        const overItems = newTasks[overContainerId];
+    setTasksByGroup((prev) => {
+      // --- PERBAIKAN UTAMA ADA DI SINI ---
+      // Gunakan metode 'reduce' untuk membuat salinan state yang type-safe
+      const newTasks: TasksByGroup = Object.keys(prev).reduce((acc, key) => {
+        acc[key] = [...prev[key]!];
+        return acc;
+      }, {} as TasksByGroup);
 
-        if (!activeItems || !overItems) return prev;
-        const activeIndex = activeItems.findIndex((t) => t.id === activeId);
+      const activeItems = newTasks[activeContainer]!;
+      const overItems = newTasks[overContainer]!;
+
+      const activeIndex = activeItems.findIndex((t) => t.id === activeId);
+      const [movedItem] = activeItems.splice(activeIndex, 1);
+
+      if (!movedItem) return prev;
+
+      if (activeContainer === overContainer) {
+        // Skenario 1: Reorder di kolom yang sama
         const overIndex = overItems.findIndex((t) => t.id === overId);
-
-        const [movedItem] = activeItems.splice(activeIndex, 1);
-
-        // Masukkan item ke posisi baru di kolom tujuan
-        if (!movedItem) return prev;
         overItems.splice(overIndex, 0, movedItem);
+      } else {
+        // Skenario 2: Pindah ke kolom berbeda
+        const isOverAColumn = over.data.current?.type === "COLUMN";
+        if (isOverAColumn) {
+          overItems.push(movedItem);
+        } else {
+          const overIndex = overItems.findIndex((t) => t.id === overId);
+          overItems.splice(overIndex, 0, movedItem);
+        }
+      }
 
-        return newTasks;
-      });
-    }
+      return newTasks;
+    });
   };
 
   return (
     <AuthRoute>
       <SideNav>
-        <div className="flex h-full gap-4 p-4">
-          <div className="flex min-h-full w-full flex-col items-center gap-4 rounded-2xl border border-purple-300 p-4">
-            <h1>todo</h1>
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-center gap-5 p-5">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "20px",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {Object.keys(tasksByGroup).map((groupId) => (
-                      <ColumnTask
-                        key={groupId}
-                        id={groupId}
-                        title={groupId.replace("group-", "").toUpperCase()}
-                        tasks={tasksByGroup[groupId]}
-                      />
-                    ))}
-                  </div>
-                </DndContext>
-              </div>
+        <Button onClick={signOut}>Keluar</Button>
+        <div className="flex h-full gap-4 overflow-x-auto p-4">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="flex min-h-full items-start gap-4 p-4">
+              {Object.keys(tasksByGroup).map((groupId) => (
+                <ColumnTask
+                  key={groupId}
+                  id={groupId}
+                  title={groupId.replace("-", " ")}
+                  tasks={tasksByGroup[groupId]!}
+                />
+              ))}
             </div>
-          </div>
-          {/* <div className="min-h-full w-full rounded-2xl border border-purple-300 p-4">
-            <h1>on progress</h1>
-          </div>
-          <div className="min-h-full w-full rounded-2xl border border-purple-300 p-4">
-            <h1>done</h1>
-          </div> */}
+            <DragOverlay>
+              {activeTask ? (
+                <CardTask id={activeTask.id} title={activeTask.title} />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
       </SideNav>
     </AuthRoute>
@@ -157,7 +180,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-function setIsDropped(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
-

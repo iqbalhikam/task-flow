@@ -73,7 +73,7 @@ const LoginPage = () => {
                 Login Sekarang!!!
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                DanManajement tugas ada dengan mudah
+                Dan Manajement tugas ada dengan mudah
               </CardDescription>
             </CardHeader>
             <CardContent>
